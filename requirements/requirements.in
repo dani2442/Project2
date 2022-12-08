@@ -8,3 +8,4 @@ matplotlib
 librosa
 pandas
 seaborn
+tensorboard

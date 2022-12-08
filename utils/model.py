@@ -151,7 +151,7 @@ class AudioEncoder(nn.Module):
 
 
 class AudioClassifier(nn.Module):
-    def __init__(self, dims: ModelDimensions):
+    def __init__(self, dims: ModelDimensions = ModelDimensions(n_mels=80, n_audio_ctx=1500, n_audio_state=384, n_audio_head=6, n_audio_layer=4)):
         super().__init__()
         self.dims = dims
         self.encoder = AudioEncoder(
