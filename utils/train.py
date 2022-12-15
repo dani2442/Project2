@@ -22,8 +22,8 @@ def train_epoch(model, dataloader, loss_fn, optimizer, device):
         loss = loss_fn(output, labels)
         loss.backward()
         optimizer.step()
-        train_loss += loss.item() * images.size(0)
-        predictions = torch.argmax(output.data, 1)
+        train_loss += loss.detach().item() * images.size(0)
+        predictions = torch.argmax(output, 1)
         train_correct += (predictions == labels).sum().item()
         total += images.size(0)
         pbar.set_description(f"Training Loss: {train_loss/total:.3f} Training Acc: {train_correct/total:.2f}")
@@ -41,7 +41,7 @@ def valid_epoch(model,dataloader,loss_fn, device):
             output = model(images)
         loss=loss_fn(output,labels)
         valid_loss+=loss.item()*images.size(0)
-        predictions = torch.argmax(output.data,1)
+        predictions = torch.argmax(output,1)
         val_correct+=(predictions == labels).sum().item()
 
     return valid_loss/len(dataloader.sampler), val_correct/len(dataloader.sampler)
@@ -71,7 +71,9 @@ def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer,
     best_accuracy = -1.0
     for epoch in range(n_epochs):
         train_loss, train_acc=train_epoch(model, train_loader, loss_fn, optimizer, device)
-        valid_loss, valid_acc=valid_epoch(model, valid_loader, loss_fn, device)
+
+        if epoch%5==4:
+            valid_loss, valid_acc=valid_epoch(model, valid_loader, loss_fn, device)
         
         scheduler.step()
         print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Valid Loss: {valid_loss:.3f} Training Acc: {train_acc:.3f} Valid Acc: {valid_acc:.3f}")
