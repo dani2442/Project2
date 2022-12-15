@@ -35,7 +35,7 @@ def valid_epoch(model,dataloader,loss_fn, device):
     valid_loss, val_correct = 0.0, 0
     model.eval()
 
-    pbar = tqdm(dataloader, disable=verbose)
+    pbar = tqdm(dataloader)
     total = 0
     for i, (images, labels) in enumerate(pbar):
 
