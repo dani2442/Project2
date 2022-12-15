@@ -31,7 +31,7 @@ def train_epoch(model, dataloader, loss_fn, optimizer, device):
     return train_loss/len(dataloader.sampler), train_correct/len(dataloader.sampler)
 
 
-def valid_epoch(model,dataloader,loss_fn, device, verbose=False):
+def valid_epoch(model,dataloader,loss_fn, device):
     valid_loss, val_correct = 0.0, 0
     model.eval()
 
