@@ -4,6 +4,7 @@ import json
 import os
 import numpy as np
 import random
+import torch
 from bisect import bisect
 
 from utils.audio import N_FRAMES, log_mel_spectrogram
@@ -17,7 +18,7 @@ def get_dataset(path):
 
 
 class SongDataset(Dataset):
-    def __init__(self, annotations, audio_dir='data/process/', transform=None, target_transform=None):
+    def __init__(self, annotations, audio_dir='', transform=None, target_transform=None):
         self.audio_labels = annotations
         self.audio_dir = audio_dir
         self.transform = transform
@@ -27,8 +28,8 @@ class SongDataset(Dataset):
         return len(self.audio_labels)
 
     def __getitem__(self, idx):
-        audio_path = os.path.join(self.audio_labels[idx][0])
-        audio = np.load(audio_path)
+        audio_path = os.path.join(self.audio_dir, self.audio_labels[idx][0])
+        audio = torch.load(audio_path)
         label = self.audio_labels[idx][1]
 
         if self.transform:
@@ -65,7 +66,7 @@ class SongDataset_v2(Dataset):
 
 
 class SongDatasetTest(Dataset):
-    def __init__(self, annotations, audio_dir='data/process/'):
+    def __init__(self, annotations, audio_dir=''):
         self.audio_labels = annotations
         self.audio_dir = audio_dir
 
@@ -73,7 +74,8 @@ class SongDatasetTest(Dataset):
         self.song_id = [0]
         
         for idx in range(len(self.audio_labels)):
-            num = self.audio_labels[idx][2]//N_FRAMES
+            audio_path = os.path.join(self.audio_dir, self.audio_labels[idx][0])
+            num = torch.load(audio_path).shape[1]//N_FRAMES
             current_value += num
             self.song_id += [current_value]
             
@@ -81,11 +83,12 @@ class SongDatasetTest(Dataset):
         return self.song_id[-1]
 
     def __getitem__(self, idx):
-        real_index = bisect(idx)-1
+        real_index = bisect(self.song_id,idx)-1
         offset = idx - self.song_id[real_index]
 
-        audio_path = os.path.join(self.audio_labels[real_index][0])
-        audio = np.load(audio_path)
+        audio_path = os.path.join(self.audio_dir, self.audio_labels[real_index][0])
+        audio = torch.load(audio_path)
+        
         label = self.audio_labels[real_index][1]
 
         return audio[:,N_FRAMES*offset:N_FRAMES*(offset+1)], label

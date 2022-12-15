@@ -63,7 +63,7 @@ def calculate_confusion_matrix(model, dataloader, device):
     return conf_matrix
 
 
-def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer, lr=1e-4, n_epochs=5, gamma=0.9, val_rate=10):
+def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer, lr=1e-4, n_epochs=5, gamma=0.9, val_rate=1):
     # optimizer and scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
