@@ -22,7 +22,7 @@ def train_epoch(model, dataloader, loss_fn, optimizer, device):
         loss = loss_fn(output, labels)
         loss.backward()
         optimizer.step()
-        train_loss += loss.detach().item() * images.size(0)
+        train_loss += loss.item() * images.size(0)
         predictions = torch.argmax(output, 1)
         train_correct += (predictions == labels).sum().item()
         total += images.size(0)
@@ -31,10 +31,13 @@ def train_epoch(model, dataloader, loss_fn, optimizer, device):
     return train_loss/len(dataloader.sampler), train_correct/len(dataloader.sampler)
 
 
-def valid_epoch(model,dataloader,loss_fn, device):
+def valid_epoch(model,dataloader,loss_fn, device, verbose=False):
     valid_loss, val_correct = 0.0, 0
     model.eval()
-    for images, labels in dataloader:
+
+    pbar = tqdm(dataloader, disable=verbose)
+    total = 0
+    for i, (images, labels) in enumerate(pbar):
 
         images,labels = images.to(device),labels.to(device)
         with torch.no_grad():
@@ -43,6 +46,8 @@ def valid_epoch(model,dataloader,loss_fn, device):
         valid_loss+=loss.item()*images.size(0)
         predictions = torch.argmax(output,1)
         val_correct+=(predictions == labels).sum().item()
+        total += images.size(0)
+        pbar.set_description(f"Test Loss: {valid_loss/total:.3f} Test Acc: {val_correct/total:.3f}")
 
     return valid_loss/len(dataloader.sampler), val_correct/len(dataloader.sampler)
 
@@ -63,10 +68,10 @@ def calculate_confusion_matrix(model, dataloader, device):
     return conf_matrix
 
 
-def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer, lr=1e-4, n_epochs=5, gamma=0.9, val_rate=1):
+def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer, lr=1e-4, n_epochs=5, gamma=0.9, val_rate=5):
     # optimizer and scheduler
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+    #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
 
     best_accuracy = -1.0
     for epoch in range(n_epochs):
@@ -80,7 +85,7 @@ def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer,
         else:
             print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Training Acc: {train_acc:.3f} ")
 
-        scheduler.step()
+        #scheduler.step()
         
         writer.add_scalar('Loss/train', train_loss, epoch)
         writer.add_scalar('Accurarcy/train', train_acc, epoch)
@@ -93,7 +98,7 @@ def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer,
 def train_final_layer(model, preprocessing, train_loader, valid_loader, loss_fn, device, lr=1e-4, n_epochs=5, gamma=0.9):
     # optimizer and scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
+    #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
 
     history = {'train_loss': [], 'valid_loss': [],'train_acc':[],'valid_acc':[]}
 
@@ -102,7 +107,7 @@ def train_final_layer(model, preprocessing, train_loader, valid_loader, loss_fn,
         train_loss, train_acc=train_epoch(model, train_loader, loss_fn,optimizer, device)
         valid_loss, valid_acc=valid_epoch(model, valid_loader, loss_fn, device)
         
-        scheduler.step()
+        #scheduler.step()
         pbar.set_description(f"Training Loss: {train_loss:.3f} Valid Loss: {valid_loss:.3f} Training Acc: {train_acc:.2f} Valid Acc: {valid_acc:.2f}")
 
         history['train_loss'].append(train_loss)
