@@ -62,8 +62,8 @@ def calculate_confusion_matrix(model, dataloader, device):
         images,labels = images.to(device),labels.to(device)
         with torch.no_grad():
             output = model(images)
-        predictions = torch.argmax(output.data,1)
-        conf_matrix += confusion_matrix(labels, predictions, labels=list(range(NUM_CLASSES)))
+        predictions = torch.argmax(output,1)
+        conf_matrix += confusion_matrix(labels.cpu().numpy(), predictions.cpu().numpy(), labels=list(range(NUM_CLASSES)))
     
     return conf_matrix
 
