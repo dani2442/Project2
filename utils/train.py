@@ -125,5 +125,5 @@ def plot_confusion_matrix(m):
     df_cm = df_cm.rename_axis("actual", axis="columns")
 
     plt.figure(figsize = (10,7))
-    sns.heatmap(df_cm, annot=True)
+    sns.heatmap(df_cm, annot=True, fmt='g')
     plt.show()
