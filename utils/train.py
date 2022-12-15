@@ -26,7 +26,7 @@ def train_epoch(model, dataloader, loss_fn, optimizer, device):
         predictions = torch.argmax(output, 1)
         train_correct += (predictions == labels).sum().item()
         total += images.size(0)
-        pbar.set_description(f"Training Loss: {train_loss/total:.3f} Training Acc: {train_correct/total:.2f}")
+        pbar.set_description(f"Training Loss: {train_loss/total:.3f} Training Acc: {train_correct/total:.3f}")
 
     return train_loss/len(dataloader.sampler), train_correct/len(dataloader.sampler)
 
@@ -74,9 +74,10 @@ def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer,
 
         if epoch%5==4:
             valid_loss, valid_acc=valid_epoch(model, valid_loader, loss_fn, device)
+            print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Valid Loss: {valid_loss:.3f} Training Acc: {train_acc:.3f} Valid Acc: {valid_acc:.3f}")
         
         scheduler.step()
-        print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Valid Loss: {valid_loss:.3f} Training Acc: {train_acc:.3f} Valid Acc: {valid_acc:.3f}")
+        print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Training Acc: {train_acc:.3f} ")
 
         writer.add_scalar('Loss/train', train_loss, epoch)
         writer.add_scalar('Loss/valid', valid_loss, epoch)
