@@ -63,7 +63,7 @@ def calculate_confusion_matrix(model, dataloader, device):
     return conf_matrix
 
 
-def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer, lr=1e-4, n_epochs=5, gamma=0.9):
+def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer, lr=1e-4, n_epochs=5, gamma=0.9, val_rate=10):
     # optimizer and scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
@@ -72,17 +72,18 @@ def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer,
     for epoch in range(n_epochs):
         train_loss, train_acc=train_epoch(model, train_loader, loss_fn, optimizer, device)
 
-        if epoch%5==4:
+        if epoch%val_rate==0:
             valid_loss, valid_acc=valid_epoch(model, valid_loader, loss_fn, device)
+            writer.add_scalar('Loss/valid', valid_loss, epoch)
+            writer.add_scalar('Accurarcy/valid', valid_acc, epoch)
             print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Valid Loss: {valid_loss:.3f} Training Acc: {train_acc:.3f} Valid Acc: {valid_acc:.3f}")
-        
-        scheduler.step()
-        print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Training Acc: {train_acc:.3f} ")
+        else:
+            print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Training Acc: {train_acc:.3f} ")
 
+        scheduler.step()
+        
         writer.add_scalar('Loss/train', train_loss, epoch)
-        writer.add_scalar('Loss/valid', valid_loss, epoch)
         writer.add_scalar('Accurarcy/train', train_acc, epoch)
-        writer.add_scalar('Accurarcy/valid', valid_acc, epoch)
 
         if best_accuracy < valid_acc:
             best_accuracy = valid_acc
