@@ -9,3 +9,4 @@ librosa
 pandas
 seaborn
 tensorboard
+ffmpeg-python
