@@ -124,8 +124,8 @@ def train_final_layer(model, preprocessing, train_loader, valid_loader, loss_fn,
 def plot_confusion_matrix(m):
     df_cm = pd.DataFrame(m, index = [i for i in classes],
                   columns = [i for i in classes])
-    df_cm = df_cm.rename_axis("predicted")
-    df_cm = df_cm.rename_axis("actual", axis="columns")
+    df_cm = df_cm.rename_axis("True labels")
+    df_cm = df_cm.rename_axis("Predicted", axis="columns")
 
     plt.figure(figsize = (10,7))
     sns.heatmap(df_cm, annot=True, fmt='g')
