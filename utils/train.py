@@ -79,6 +79,12 @@ def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer,
 
         if epoch%val_rate==0:
             valid_loss, valid_acc=valid_epoch(model, valid_loader, loss_fn, device)
+
+            if best_accuracy < valid_acc:
+                print("Saving model...")
+                best_accuracy = valid_acc
+                torch.save(model.state_dict(), save_path)
+
             writer.add_scalar('Loss/valid', valid_loss, epoch)
             writer.add_scalar('Accurarcy/valid', valid_acc, epoch)
             print(f"Epoch #{epoch:3d}: Training Loss: {train_loss:.3f} Valid Loss: {valid_loss:.3f} Training Acc: {train_acc:.3f} Valid Acc: {valid_acc:.3f}")
@@ -90,9 +96,6 @@ def train(model, train_loader, valid_loader, loss_fn, device, save_path, writer,
         writer.add_scalar('Loss/train', train_loss, epoch)
         writer.add_scalar('Accurarcy/train', train_acc, epoch)
 
-        if best_accuracy < valid_acc:
-            best_accuracy = valid_acc
-            torch.save(model.state_dict(), save_path)
 
 
 def train_final_layer(model, preprocessing, train_loader, valid_loader, loss_fn, device, lr=1e-4, n_epochs=5, gamma=0.9):
